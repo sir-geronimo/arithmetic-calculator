@@ -2,3 +2,4 @@ bin/
 .serverless/
 tmp/
 .fleet
+.DS_Store

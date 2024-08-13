@@ -1,7 +1,13 @@
 package main
 
-import "fmt"
+import (
+	"log"
+
+	"github.com/sir-geronimo/arithmetic-calculator/internal/app"
+)
 
 func main() {
-	fmt.Println("Hello, World!")
+	if err := app.Run(); err != nil {
+		log.Fatalf("%v", err)
+	}
 }

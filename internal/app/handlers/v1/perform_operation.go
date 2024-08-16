@@ -33,16 +33,19 @@ func PerformOperation(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Context().Value(middlewares.UserKey).(uuid.UUID)
 
-	err = json.NewDecoder(r.Body).Decode(&payload)
-	if err != nil {
-		_ = render.Render(w, r, &handlers.ErrResponse{
-			Err:        err,
-			StatusCode: http.StatusBadRequest,
-			Message:    err.Error(),
-		})
-		return
+	if r.Body != nil && r.ContentLength > 0 {
+		err = json.NewDecoder(r.Body).Decode(&payload)
+		if err != nil {
+			_ = render.Render(w, r, &handlers.ErrResponse{
+				Err:        err,
+				StatusCode: http.StatusBadRequest,
+				Message:    err.Error(),
+			})
+			return
+		}
+
+		defer r.Body.Close()
 	}
-	defer r.Body.Close()
 
 	usecase := usecases.NewPerformOperationUseCase(persistence.GetConnection())
 
@@ -59,7 +62,8 @@ func PerformOperation(w http.ResponseWriter, r *http.Request) {
 		statusCode := http.StatusInternalServerError
 		if errors.Is(err, usecases.ErrOperationNotFound) {
 			statusCode = http.StatusNotFound
-		} else if errors.Is(err, usecases.ErrOperationAlreadyPerformed) {
+		} else if errors.Is(err, usecases.ErrOperationAlreadyPerformed) ||
+			errors.Is(err, usecases.ErrInvalidOperationPayload) {
 			statusCode = http.StatusBadRequest
 		} else if errors.Is(err, usecases.ErrUnableToFindRecord) {
 			statusCode = http.StatusNotFound

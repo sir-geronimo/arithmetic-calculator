@@ -1,7 +1,7 @@
 package usecases
 
 import (
-	"errors"
+	"fmt"
 	"math"
 	"strconv"
 
@@ -83,19 +83,32 @@ func (u *PerformOperationUseCase) Execute(req *PerformOperationRequest) (record 
 	record.OperationResponse = operationResponse
 
 	// Save record to database
-	err = u.db.
-		Save(&record).
-		Error
-	if err != nil {
-		return nil, ErrUnableToPerformOperation
-	}
+	u.db.Transaction(func(tx *gorm.DB) error {
+		err = u.db.
+			Save(&record).
+			Error
+		if err != nil {
+			return ErrUnableToPerformOperation
+		}
+
+		// Return record
+		err = u.db.
+			Preload("Operation").
+			First(&record).
+			Error
+		if err != nil {
+			return ErrUnableToPerformOperation
+		}
+
+		return nil
+	})
 
 	return record, err
 }
 
 func (u *PerformOperationUseCase) add(req *PerformOperationRequest) (string, error) {
 	if req.Num1 == 0 && req.Num2 == 0 {
-		return "", errors.New("both number must not be `0`")
+		return "", fmt.Errorf("%w: both number must not be `0`", ErrInvalidOperationPayload)
 	}
 
 	res := req.Num1 + req.Num2
@@ -105,7 +118,7 @@ func (u *PerformOperationUseCase) add(req *PerformOperationRequest) (string, err
 
 func (u *PerformOperationUseCase) subtract(req *PerformOperationRequest) (string, error) {
 	if req.Num1 == 0 && req.Num2 == 0 {
-		return "", errors.New("both number must not be `0`")
+		return "", fmt.Errorf("%w: both number must not be `0`", ErrInvalidOperationPayload)
 	}
 
 	res := req.Num1 - req.Num2
@@ -115,7 +128,7 @@ func (u *PerformOperationUseCase) subtract(req *PerformOperationRequest) (string
 
 func (u *PerformOperationUseCase) multiply(req *PerformOperationRequest) (string, error) {
 	if req.Num1 == 0 && req.Num2 == 0 {
-		return "", errors.New("both number must not be `0`")
+		return "", fmt.Errorf("%w: both number must not be `0`", ErrInvalidOperationPayload)
 	}
 
 	res := req.Num1 * req.Num2
@@ -125,10 +138,10 @@ func (u *PerformOperationUseCase) multiply(req *PerformOperationRequest) (string
 
 func (u *PerformOperationUseCase) divide(req *PerformOperationRequest) (string, error) {
 	if req.Num1 == 0 && req.Num2 == 0 {
-		return "", errors.New("both number must not be `0`")
+		return "", fmt.Errorf("%w: both number must not be `0`", ErrInvalidOperationPayload)
 	}
 	if req.Num2 == 0 {
-		return "", errors.New("invalid divisor. Divisor must not be `0`")
+		return "", fmt.Errorf("%w: invalid divisor. Divisor must not be `0`", ErrInvalidOperationPayload)
 	}
 
 	res := req.Num1 / req.Num2
@@ -138,10 +151,10 @@ func (u *PerformOperationUseCase) divide(req *PerformOperationRequest) (string, 
 
 func (u *PerformOperationUseCase) sqrt(req *PerformOperationRequest) (string, error) {
 	if req.Num1 == 0 {
-		return "", errors.New("number must not be `0`")
+		return "", fmt.Errorf("%w: number must not be `0`", ErrInvalidOperationPayload)
 	}
 	if req.Num1 < 0 {
-		return "", errors.New("number must not be negative")
+		return "", fmt.Errorf("%w: number must not be negative", ErrInvalidOperationPayload)
 	}
 
 	res := int(math.Sqrt(float64(req.Num1)))

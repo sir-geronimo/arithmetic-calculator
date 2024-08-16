@@ -22,13 +22,15 @@ func FetchRecords(w http.ResponseWriter, r *http.Request) {
 	perPage, _ := strconv.Atoi(query.Get("per_page"))
 	if perPage <= 0 {
 		perPage = 10
+	} else if perPage > 100 {
+		perPage = 100
 	}
 	filter := query.Get("q")
 	order := query.Has("order_asc")
 
 	usecase := usecases.NewFetchRecordsUseCase(persistence.GetConnection())
 
-	records, err := usecase.Execute(userID, &usecases.FetchRecordsOptions{
+	result, err := usecase.Execute(userID, &usecases.FetchRecordsOptions{
 		Page:     page,
 		PerPage:  perPage,
 		Filter:   filter,
@@ -43,5 +45,5 @@ func FetchRecords(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, r, records)
+	render.JSON(w, r, result)
 }

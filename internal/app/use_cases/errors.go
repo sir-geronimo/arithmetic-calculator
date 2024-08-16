@@ -14,4 +14,6 @@ var (
 	ErrInvalidOperationType      = errors.New("invalid operation type")
 	ErrInsufficientBalance       = errors.New("cannot perform operation. Insufficient balance")
 	ErrOperationAlreadyPerformed = errors.New("cannot reprocess operation. Operation already performed")
+	ErrUnableToGetBalance        = errors.New("unable to get balance")
+	ErrInvalidOperationPayload   = errors.New("invalid payload")
 )

@@ -25,6 +25,8 @@ type ErrResponse struct {
 func (e *ErrResponse) Render(_ http.ResponseWriter, r *http.Request) error {
 	if e.StatusCode >= http.StatusInternalServerError {
 		log.Printf("\033[31m[ERROR]\033[0m %+v\n", e.Err)
+	} else if e.StatusCode >= http.StatusBadRequest {
+		log.Printf("\033[31m[WARN]\033[0m %+v\n", e.Err)
 	}
 
 	render.Status(r, e.StatusCode)

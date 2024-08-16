@@ -12,6 +12,7 @@ func Routes(r chi.Router) {
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.BearerTokenAuthenticator)
 
+			r.Get("/balance", GetBalance)
 			r.Post("/operations", CreateOperation)
 			r.Post("/operations/{operation_id}/perform", PerformOperation)
 			r.Get("/records", FetchRecords)

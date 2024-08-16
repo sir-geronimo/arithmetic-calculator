@@ -42,14 +42,7 @@ func computeBalance(
 	userID uuid.UUID,
 	operation *entities.Operation,
 ) (int, error) {
-	// Retrieve last user record
-	var record entities.Record
-	err := db.
-		Where("user_id = ?", userID).
-		Limit(1).
-		Order("date DESC").
-		Find(&record).
-		Error
+	record, err := retrieveLastRecord(db, userID)
 	if err != nil {
 		return 0, ErrUnableToFindRecord
 	}

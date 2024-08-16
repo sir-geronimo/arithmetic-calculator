@@ -17,7 +17,7 @@ type Record struct {
 	Date              time.Time `json:"date" gorm:"not null; default:NOW();"`
 	DeletedAt         time.Time `json:"deleted_at" gorm:"default:null"`
 
-	Operation *Operation `json:"-" gorm:"not null;"`
+	Operation *Operation `json:"operation" gorm:"not null;"`
 	User      *User      `json:"-" gorm:"not null;"`
 }
 

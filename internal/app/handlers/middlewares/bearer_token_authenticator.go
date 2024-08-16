@@ -25,7 +25,13 @@ func BearerTokenAuthenticator(next http.Handler) http.Handler {
 			return
 		}
 
-		t := strings.Split(auth, " ")[1]
+		pieces := strings.Split(auth, " ")
+		if len(pieces) < 2 {
+			_ = render.Render(w, r, handlers.ErrUnauthorized)
+			return
+		}
+
+		t := pieces[1]
 		if t == "" {
 			_ = render.Render(w, r, handlers.ErrUnauthorized)
 			return
